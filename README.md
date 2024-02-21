@@ -1,4 +1,4 @@
-Social Content Platform - Graduation Project
+## Social Content Platform - Graduation Project
 
 Social Content Platform, a graduation project designed for university showcasing a simple content-sharing platform.
 
