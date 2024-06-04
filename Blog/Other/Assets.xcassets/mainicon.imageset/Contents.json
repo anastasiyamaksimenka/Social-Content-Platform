@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "mainicon.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
