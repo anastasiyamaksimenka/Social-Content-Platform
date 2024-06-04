@@ -7,7 +7,7 @@
 
 import UIKit
 import FirebaseAuth
-import FirebaseD// Ensure Firebase is imported
+import FirebaseFirestore
 
 class SettingsViewController: UIViewController {
 
@@ -30,69 +30,57 @@ class SettingsViewController: UIViewController {
     
     @objc private func didTapDeleteProfile() {
         // Show an alert for confirmation before deletion
-        let alertController = UIAlertController(title: "Delete Profile",
-                                                message: "Are you sure you want to delete your profile? This action cannot be undone.",
-                                                preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Delete Profile", message: "Are you sure you want to delete your profile? This action cannot be undone.", preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            self.deleteProfileFromFirebase()
-        }
-        
-        alertController.addAction(cancelAction)
-        alertController.addAction(deleteAction)
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alertController.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            self.deleteProfile()
+        }))
         
         present(alertController, animated: true, completion: nil)
     }
     
-    private func deleteProfileFromFirebase() {
+    private func deleteProfile() {
         guard let user = Auth.auth().currentUser else {
-            print("No user is currently signed in.")
             return
         }
         
-        // Delete the user's profile from Firebase
-        let userId = user.uid
-        let userRef = Database.database().reference().child("users").child(userId)
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
         
-        userRef.removeValue { error, _ in
+        // Delete user data from Firestore
+        userRef.delete { error in
             if let error = error {
-                // Handle the error
-                print("Failed to delete user profile: \(error.localizedDescription)")
-                self.showDeletionResultAlert(success: false)
+                print("Error deleting user data: \(error)")
+                // Show an error alert to the user
+                let errorAlert = UIAlertController(title: "Error", message: "There was an error deleting your profile. Please try again later.", preferredStyle: .alert)
+                errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(errorAlert, animated: true, completion: nil)
                 return
             }
             
-            // Also delete the user's authentication record
+            // Delete user authentication account
             user.delete { error in
                 if let error = error {
-                    // Handle the error
-                    print("Failed to delete user authentication record: \(error.localizedDescription)")
-                    self.showDeletionResultAlert(success: false)
+                    print("Error deleting user: \(error)")
+                    // Show an error alert to the user
+                    let errorAlert = UIAlertController(title: "Error", message: "There was an error deleting your profile. Please try again later.", preferredStyle: .alert)
+                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(errorAlert, animated: true, completion: nil)
                     return
                 }
                 
-                // Successfully deleted the profile
-                print("User profile deleted successfully.")
-                self.showDeletionResultAlert(success: true)
+                // Successfully deleted user
+                print("User profile deleted successfully")
+                // Optionally, navigate to a different screen or show a success message
+                let successAlert = UIAlertController(title: "Success", message: "Your profile has been deleted successfully.", preferredStyle: .alert)
+                successAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                    // Navigate to the initial screen or login screen
+                    // For example:
+                    // self.navigationController?.popToRootViewController(animated: true)
+                }))
+                self.present(successAlert, animated: true, completion: nil)
             }
-        }
-    }
-    
-    private func showDeletionResultAlert(success: Bool) {
-        let title = success ? "Profile Deleted" : "Deletion Failed"
-        let message = success ? "Your profile has been deleted successfully." : "There was an error deleting your profile. Please try again later."
-        
-        let resultAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        resultAlertController.addAction(okAction)
-        
-        present(resultAlertController, animated: true, completion: nil)
-        
-        if success {
-            // Optionally, navigate the user to the login screen or another appropriate screen
-            // For example:
-            // self.navigationController?.popToRootViewController(animated: true)
         }
     }
 }
