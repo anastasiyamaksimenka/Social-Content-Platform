@@ -114,7 +114,8 @@ final class DatabaseManager {
                         title: title,
                         timestamp: created,
                         headerImageUrl: URL(string: imageUrlString),
-                        text: body
+                        text: body,
+                        link: "https://blog.com/post/\(id)"
                     )
                     return post
                 })

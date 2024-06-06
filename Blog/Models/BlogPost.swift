@@ -14,4 +14,5 @@ struct BlogPost{
     let headerImageUrl: URL?
     let text: String
     //let publicationDate: Date
+    let link: String
 }

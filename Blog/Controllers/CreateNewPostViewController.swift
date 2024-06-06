@@ -129,7 +129,8 @@ class CreateNewPostViewController: UITabBarController {
                                     title: title,
                                     timestamp: Date().timeIntervalSince1970,
                                     headerImageUrl: headerUrl,
-                                    text: body)
+                                    text: body,
+                                    link: "https://example.com/post/\(newPostId)")
                 
                 DatabaseManager.shared.insert(blogPost: post, email: email) { [weak self] posted in
                     guard posted else {

@@ -25,10 +25,8 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
     private let tableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
-        table.register(UITableViewCell.self,
-                       forCellReuseIdentifier: "cell")
-        table.register(PostHeaderTableViewCell.self,
-                       forCellReuseIdentifier: PostHeaderTableViewCell.identifier)
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(PostHeaderTableViewCell.self, forCellReuseIdentifier: PostHeaderTableViewCell.identifier)
         return table
     }()
 
@@ -71,27 +69,59 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
     }
 
     private func deletePostConfirmed() {
-        // Implement post deletion logic here
-        // Show success or failure message as appropriate
+        // Show a loading indicator while the deletion is being processed
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = view.center
+        view.addSubview(activityIndicator)
+        activityIndicator.startAnimating()
+
+        // Simulate network deletion request (replace with actual network request)
+        DispatchQueue.global().async {
+            sleep(2) // Simulate network delay
+            
+            DispatchQueue.main.async {
+                activityIndicator.stopAnimating()
+                activityIndicator.removeFromSuperview()
+                
+                // Handle success response
+                self.showAlert(title: "Success", message: "The post has been deleted.", confirmAction: {
+                    self.navigationController?.popViewController(animated: true)
+                })
+                
+                // Handle error response (Uncomment if handling actual network request)
+                // self.showAlert(title: "Error", message: "Failed to delete the post.")
+            }
+        }
     }
 
     private func showAlert(title: String, message: String, confirmAction: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alertController.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
-            confirmAction?()
-        }))
+        if let confirmAction = confirmAction {
+            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                confirmAction()
+            }))
+        } else {
+            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        }
         present(alertController, animated: true, completion: nil)
     }
-
     
     @objc private func sharePost() {
         // Share post logic
-        let shareText = "Check out this post: \(post.title)"
-        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
-        present(activityViewController, animated: true, completion: nil)
+        let shareText = "Check out this post:"
+        if let postURL = URL(string: post.link) {
+            let activityViewController = UIActivityViewController(activityItems: [shareText, postURL], applicationActivities: nil)
+            activityViewController.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
+            present(activityViewController, animated: true, completion: nil)
+        } else {
+            // Handle the case where the URL is invalid
+            let alert = UIAlertController(title: "Error", message: "Unable to share the post link.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alert, animated: true, completion: nil)
+        }
     }
+
 
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -112,8 +142,7 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
             cell.textLabel?.text = post.title
             return cell
         case 1:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: PostHeaderTableViewCell.identifier,
-                                                           for: indexPath) as? PostHeaderTableViewCell else {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: PostHeaderTableViewCell.identifier, for: indexPath) as? PostHeaderTableViewCell else {
                 fatalError()
             }
             cell.selectionStyle = .none
