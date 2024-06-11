@@ -32,7 +32,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .systemFill
         setUpSignOutButton()
         setUpSettingsButton()
         setUpTable()
@@ -57,7 +57,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private func setUpTableHeader(profilePhotoUrl : String? = nil, name: String? = nil){
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.width/3))
-        headerView.backgroundColor = .systemBackground
+        headerView.backgroundColor = .systemFill
         headerView.isUserInteractionEnabled = true
         headerView.clipsToBounds = true
         tableView.tableHeaderView = headerView

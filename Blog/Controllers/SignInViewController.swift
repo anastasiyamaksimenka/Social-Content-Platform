@@ -39,6 +39,16 @@ class SignInViewController: UITabBarController {
         field.backgroundColor = .secondarySystemBackground
         field.layer.cornerRadius = 8
         field.layer.masksToBounds = true
+        
+        // Adding the eye button to the right view of the password field
+        let eyeButton = UIButton(type: .custom)
+        eyeButton.setImage(UIImage(systemName: "eye"), for: .normal)
+        eyeButton.setImage(UIImage(systemName: "eye.slash"), for: .selected)
+        eyeButton.tintColor = .gray
+        eyeButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
+        field.rightView = eyeButton
+        field.rightViewMode = .always
+        
         return field
     }()
     
@@ -68,10 +78,8 @@ class SignInViewController: UITabBarController {
         return button
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        //navigationController?.setNavigationBarHidden(true, animated: false)
         title = "Sign In"
         view.backgroundColor = .systemBackground
         view.addSubview(headerView)
@@ -84,7 +92,6 @@ class SignInViewController: UITabBarController {
         signInButton.addTarget(self, action: #selector(didTapSignIn), for: .touchUpInside)
         createAccountButton.addTarget(self, action: #selector(didTapCreateAccount), for: .touchUpInside)
         forgotPasswordButton.addTarget(self, action: #selector(didTapForgotPassword), for: .touchUpInside)
-        
     }
     
     override func viewDidLayoutSubviews() {
@@ -98,13 +105,31 @@ class SignInViewController: UITabBarController {
         forgotPasswordButton.frame = CGRect(x: 20, y: createAccountButton.frame.origin.y + createAccountButton.frame.size.height + 10, width: view.frame.width - 40, height: 50)
     }
     
-    @objc func didTapSignIn(){
-        guard let email = emailField.text, !email.isEmpty, let password = passwordField.text, !password.isEmpty else{
+    @objc private func togglePasswordVisibility(_ sender: UIButton) {
+        sender.isSelected.toggle()
+        passwordField.isSecureTextEntry.toggle()
+        
+        // Fix to retain the password text when toggling
+        if let existingText = passwordField.text, passwordField.isSecureTextEntry {
+            passwordField.deleteBackward()
+            passwordField.insertText(existingText)
+        } else if let existingText = passwordField.text {
+            passwordField.text = nil
+            passwordField.insertText(existingText)
+        }
+    }
+    
+    @objc func didTapSignIn() {
+        guard let email = emailField.text, !email.isEmpty, let password = passwordField.text, !password.isEmpty else {
+            showAlert(message: "Please enter both email and password.")
             return
         }
         
-        AuthManager.shared.signIn(email: email, password: password) {
-            [weak self] success in guard success else{
+        AuthManager.shared.signIn(email: email, password: password) { [weak self] success in
+            guard success else {
+                DispatchQueue.main.async {
+                    self?.showAlert(message: "Incorrect email or password. Please try again.")
+                }
                 return
             }
             DispatchQueue.main.async {
@@ -116,17 +141,22 @@ class SignInViewController: UITabBarController {
         }
     }
     
-    @objc func didTapCreateAccount(){
+    @objc func didTapCreateAccount() {
         let vc = SignUpViewController()
         vc.title = "Create Account"
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)
-        
     }
     
     @objc func didTapForgotPassword() {
         // Handle the forgot password action, e.g., navigate to password reset screen
         let forgotPasswordVC = ForgotPasswordViewController()
         navigationController?.pushViewController(forgotPasswordVC, animated: true)
+    }
+    
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+        present(alert, animated: true)
     }
 }
