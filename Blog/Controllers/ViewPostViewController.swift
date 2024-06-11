@@ -56,40 +56,31 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
 
     @objc private func deletePost() {
         guard isOwnedByCurrentUser else {
-            // Display an error message if the user doesn't own the post
             showAlert(title: "Error", message: "You don't have permission to delete this post.")
             return
         }
         
-        // If user owns the post, show a confirmation dialog
         showAlert(title: "Delete Post", message: "Are you sure you want to delete this post?", confirmAction: {
-            // Call the deletion logic
             self.deletePostConfirmed()
         })
     }
 
     private func deletePostConfirmed() {
-        // Show a loading indicator while the deletion is being processed
         let activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.center = view.center
         view.addSubview(activityIndicator)
         activityIndicator.startAnimating()
 
-        // Simulate network deletion request (replace with actual network request)
         DispatchQueue.global().async {
-            sleep(2) // Simulate network delay
+            sleep(2)
             
             DispatchQueue.main.async {
                 activityIndicator.stopAnimating()
                 activityIndicator.removeFromSuperview()
                 
-                // Handle success response
                 self.showAlert(title: "Success", message: "The post has been deleted.", confirmAction: {
                     self.navigationController?.popViewController(animated: true)
                 })
-                
-                // Handle error response (Uncomment if handling actual network request)
-                // self.showAlert(title: "Error", message: "Failed to delete the post.")
             }
         }
     }
@@ -108,27 +99,24 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
     }
     
     @objc private func sharePost() {
-        // Share post logic
         let shareText = "Check out this post:"
         if let postURL = URL(string: post.link) {
             let activityViewController = UIActivityViewController(activityItems: [shareText, postURL], applicationActivities: nil)
             activityViewController.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
             present(activityViewController, animated: true, completion: nil)
         } else {
-            // Handle the case where the URL is invalid
             let alert = UIAlertController(title: "Error", message: "Unable to share the post link.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             present(alert, animated: true, completion: nil)
         }
     }
 
-
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return 4
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -154,6 +142,14 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
             cell.textLabel?.numberOfLines = 0
             cell.textLabel?.text = post.text
             return cell
+        case 3:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            cell.selectionStyle = .none
+            cell.textLabel?.numberOfLines = 1
+            cell.textLabel?.font = .systemFont(ofSize: 14, weight: .light)
+            cell.textLabel?.textColor = .secondaryLabel
+            cell.textLabel?.text = "Published on: \(formatDate(post.date))"
+            return cell
         default:
             fatalError()
         }
@@ -168,8 +164,17 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
             return 250
         case 2:
             return UITableView.automaticDimension
+        case 3:
+            return UITableView.automaticDimension
         default:
             return UITableView.automaticDimension
         }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }

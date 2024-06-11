@@ -13,6 +13,9 @@ struct BlogPost{
     let timestamp: TimeInterval
     let headerImageUrl: URL?
     let text: String
-    //let publicationDate: Date
     let link: String
+    
+    var date: Date {
+            return Date(timeIntervalSince1970: timestamp)
+        }
 }

@@ -72,7 +72,10 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("Fetching home feed...")
         
         DatabaseManager.shared.getAllPosts { [weak self] posts in
-            self?.posts = posts
+            // Sort the posts by date in descending order
+            let sortedPosts = posts.sorted { $0.date > $1.date }
+            
+            self?.posts = sortedPosts
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
@@ -106,5 +109,4 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         vc.title = "Post"
         navigationController?.pushViewController(vc, animated: true)
     }
-    
 }
