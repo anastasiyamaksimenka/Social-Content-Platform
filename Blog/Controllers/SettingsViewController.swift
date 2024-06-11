@@ -10,7 +10,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class SettingsViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -53,9 +53,7 @@ class SettingsViewController: UIViewController {
             if let error = error {
                 print("Error deleting user data: \(error)")
                 // Show an error alert to the user
-                let errorAlert = UIAlertController(title: "Error", message: "There was an error deleting your profile. Please try again later.", preferredStyle: .alert)
-                errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(errorAlert, animated: true, completion: nil)
+                self.showDeleteErrorAlert()
                 return
             }
             
@@ -64,23 +62,32 @@ class SettingsViewController: UIViewController {
                 if let error = error {
                     print("Error deleting user: \(error)")
                     // Show an error alert to the user
-                    let errorAlert = UIAlertController(title: "Error", message: "There was an error deleting your profile. Please try again later.", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true, completion: nil)
+                    self.showDeleteErrorAlert()
                     return
                 }
                 
                 // Successfully deleted user
                 print("User profile deleted successfully")
                 // Optionally, navigate to a different screen or show a success message
-                let successAlert = UIAlertController(title: "Success", message: "Your profile has been deleted successfully.", preferredStyle: .alert)
-                successAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                    // Navigate to the initial screen or login screen
-                    // For example:
-                    // self.navigationController?.popToRootViewController(animated: true)
-                }))
-                self.present(successAlert, animated: true, completion: nil)
+                self.showDeleteSuccessAlert()
             }
         }
+    }
+    
+    private func showDeleteSuccessAlert() {
+        let successAlert = UIAlertController(title: "Success", message: "Your profile has been deleted successfully.", preferredStyle: .alert)
+        successAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            // Navigate to the Sign In screen
+            let signInVC = SignInViewController()
+            signInVC.modalPresentationStyle = .fullScreen
+            self.present(signInVC, animated: true, completion: nil)
+        }))
+        present(successAlert, animated: true, completion: nil)
+    }
+    
+    private func showDeleteErrorAlert() {
+        let errorAlert = UIAlertController(title: "Error", message: "There was an error deleting your profile. Please try again later.", preferredStyle: .alert)
+        errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(errorAlert, animated: true, completion: nil)
     }
 }
