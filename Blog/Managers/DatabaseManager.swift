@@ -44,43 +44,78 @@ final class DatabaseManager {
             }
     }
     
+    ///
+    func deletePost(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+            database.collection("posts").document(postId).delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    ///
+    
     public func getAllPosts(
         completion: @escaping ([BlogPost]) -> Void
     ) {
         database
             .collection("users")
             .getDocuments { [weak self] snapshot, error in
-                guard let documents = snapshot?.documents.compactMap({ $0.data() }),
-                      error == nil else {
+                guard let self = self else { return } // Ensure self is not nil
+
+                if let error = error {
+                    print("Error fetching user documents: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        completion([])
+                    }
                     return
                 }
                 
-                let emails: [String] = documents.compactMap({ $0["email"] as? String })
+                guard let documents = snapshot?.documents.compactMap({ $0.data() }),
+                      !documents.isEmpty else {
+                    DispatchQueue.main.async {
+                        completion([])
+                    }
+                    return
+                }
+                
+                let emails: [String] = documents.compactMap { $0["email"] as? String }
                 print(emails)
                 guard !emails.isEmpty else {
-                    completion([])
+                    DispatchQueue.main.async {
+                        completion([])
+                    }
                     return
                 }
                 
                 let group = DispatchGroup()
                 var result: [BlogPost] = []
+                var hasError = false
                 
                 for email in emails {
                     group.enter()
-                    self?.getPosts(for: email) { userPosts in
-                        defer {
-                            group.leave()
+                    self.getPosts(for: email) { userPosts in
+                        defer { group.leave() }
+                        
+                        if userPosts.isEmpty {
+                            hasError = true
+                        } else {
+                            result.append(contentsOf: userPosts)
                         }
-                        result.append(contentsOf: userPosts)
                     }
                 }
                 
-                group.notify(queue: .global()) {
+                group.notify(queue: .main) {
+                    if hasError {
+                        print("Some posts could not be fetched.")
+                    }
                     print("Feed posts: \(result.count)")
                     completion(result)
                 }
             }
     }
+
     
     public func getPosts(
         for email: String,
@@ -144,6 +179,8 @@ final class DatabaseManager {
                 completion(error == nil)
             }
     }
+    
+    
     
     public func getUser(
         email: String,

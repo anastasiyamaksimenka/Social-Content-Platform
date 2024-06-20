@@ -72,15 +72,19 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("Fetching home feed...")
         
         DatabaseManager.shared.getAllPosts { [weak self] posts in
+            guard let self = self else { return }
+
             // Sort the posts by date in descending order
             let sortedPosts = posts.sorted { $0.date > $1.date }
             
-            self?.posts = sortedPosts
+            // Update posts and reload table view on the main thread
             DispatchQueue.main.async {
-                self?.tableView.reloadData()
+                self.posts = sortedPosts
+                self.tableView.reloadData()
             }
         }
     }
+
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count

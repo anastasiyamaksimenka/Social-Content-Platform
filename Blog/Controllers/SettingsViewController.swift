@@ -16,6 +16,12 @@ class SettingsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Settings"
         
+        // Cancel Button
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel",
+                                                           style: .done,
+                                                           target: self,
+                                                           action: #selector(didTapCancel))
+        
         let deleteButton = UIButton(type: .system)
         deleteButton.setTitle("Delete Profile", for: .normal)
         deleteButton.addTarget(self, action: #selector(didTapDeleteProfile), for: .touchUpInside)
@@ -26,6 +32,10 @@ class SettingsViewController: UIViewController {
             deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             deleteButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+    }
+    
+    @objc private func didTapCancel() {
+        dismiss(animated: true, completion: nil)
     }
     
     @objc private func didTapDeleteProfile() {
@@ -42,6 +52,7 @@ class SettingsViewController: UIViewController {
     
     private func deleteProfile() {
         guard let user = Auth.auth().currentUser else {
+            print("No user is signed in.")
             return
         }
         
@@ -51,7 +62,7 @@ class SettingsViewController: UIViewController {
         // Delete user data from Firestore
         userRef.delete { error in
             if let error = error {
-                print("Error deleting user data: \(error)")
+                print("Error deleting user data: \(error.localizedDescription)")
                 // Show an error alert to the user
                 self.showDeleteErrorAlert()
                 return
@@ -60,7 +71,7 @@ class SettingsViewController: UIViewController {
             // Delete user authentication account
             user.delete { error in
                 if let error = error {
-                    print("Error deleting user: \(error)")
+                    print("Error deleting user: \(error.localizedDescription)")
                     // Show an error alert to the user
                     self.showDeleteErrorAlert()
                     return

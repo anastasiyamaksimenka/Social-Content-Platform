@@ -184,12 +184,13 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var posts : [BlogPost] = []
     
     private func fetchPosts() {
-        
         print("Fetching posts...")
-        
+
         DatabaseManager.shared.getPosts(for: currentEmail) { [weak self] posts in
-            self?.posts = posts
-            print("Found \(posts.count) posts")
+            // Sort posts by date of publication in descending order
+            let sortedPosts = posts.sorted { $0.date > $1.date }
+            self?.posts = sortedPosts
+            print("Found \(sortedPosts.count) posts")
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
