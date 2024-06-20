@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SignUpViewController: UITabBarController {
+class SignUpViewController: UIViewController {
     
     // Header View
     private let headerView = SignInHeaderView()
@@ -51,6 +51,16 @@ class SignUpViewController: UITabBarController {
         field.backgroundColor = .secondarySystemBackground
         field.layer.cornerRadius = 8
         field.layer.masksToBounds = true
+        
+        // Add eye button for toggling password visibility
+        let eyeButton = UIButton(type: .custom)
+        eyeButton.setImage(UIImage(systemName: "eye"), for: .normal)
+        eyeButton.setImage(UIImage(systemName: "eye.slash"), for: .selected)
+        eyeButton.tintColor = .gray
+        eyeButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
+        field.rightView = eyeButton
+        field.rightViewMode = .always
+        
         return field
     }()
     
@@ -86,13 +96,14 @@ class SignUpViewController: UITabBarController {
         emailField.frame = CGRect(x: 20, y: nameField.frame.origin.y + nameField.frame.size.height + 10, width: view.frame.width - 40, height: 50)
         passwordField.frame = CGRect(x: 20, y: emailField.frame.origin.y + emailField.frame.size.height + 10, width: view.frame.width - 40, height: 50)
         signUpButton.frame = CGRect(x: 20, y: passwordField.frame.origin.y + passwordField.frame.size.height + 30, width: view.frame.width - 40, height: 50)
-        
     }
     
-    @objc func didTapSignUp() {
+    @objc private func didTapSignUp() {
         guard let email = emailField.text, !email.isEmpty,
               let password = passwordField.text, !password.isEmpty,
               let name = nameField.text, !name.isEmpty else {
+            // Show alert if any field is empty
+            showAlert(message: "Please fill out all fields.")
             return
         }
         
@@ -120,8 +131,26 @@ class SignUpViewController: UITabBarController {
             } else {
                 print("Failed to create account")
             }
-            
         }
+    }
+    
+    @objc private func togglePasswordVisibility(_ sender: UIButton) {
+        sender.isSelected.toggle()
+        passwordField.isSecureTextEntry.toggle()
         
+        // Fix to retain the password text when toggling
+        if let existingText = passwordField.text, passwordField.isSecureTextEntry {
+            passwordField.deleteBackward()
+            passwordField.insertText(existingText)
+        } else if let existingText = passwordField.text {
+            passwordField.text = nil
+            passwordField.insertText(existingText)
+        }
+    }
+    
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }
