@@ -71,16 +71,16 @@ class ViewPostViewController: UIViewController, UITableViewDataSource, UITableVi
         view.addSubview(activityIndicator)
         activityIndicator.startAnimating()
 
-        DispatchQueue.global().async {
-            sleep(2)
+        DatabaseManager.shared.deletePost(post) { success in
+            activityIndicator.stopAnimating()
+            activityIndicator.removeFromSuperview()
             
-            DispatchQueue.main.async {
-                activityIndicator.stopAnimating()
-                activityIndicator.removeFromSuperview()
-                
+            if success {
                 self.showAlert(title: "Success", message: "The post has been deleted.", confirmAction: {
                     self.navigationController?.popViewController(animated: true)
                 })
+            } else {
+                self.showAlert(title: "Error", message: "Failed to delete the post. Please try again.")
             }
         }
     }

@@ -18,7 +18,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         return tableView
     }()
     
-    let currentEmail : String
+    let currentEmail: String
     
     init(currentEmail: String) {
         self.currentEmail = currentEmail
@@ -29,7 +29,6 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         fatalError()
     }
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemFill
@@ -38,6 +37,9 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         setUpTable()
         title = nil
         fetchPosts()
+        
+        // Observe the notification for new post creation
+        NotificationCenter.default.addObserver(self, selector: #selector(didCreateNewPost), name: .didCreateNewPost, object: nil)
     }
     
     override func viewDidLayoutSubviews() {
@@ -45,7 +47,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         tableView.frame = view.bounds
     }
     
-    private func setUpTable(){
+    private func setUpTable() {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
@@ -53,51 +55,48 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         fetchProfileData()
     }
     
-    
-    
-    private func setUpTableHeader(profilePhotoUrl : String? = nil, name: String? = nil){
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.width/3))
+    private func setUpTableHeader(profilePhotoUrl: String? = nil, name: String? = nil) {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.width / 3))
         headerView.backgroundColor = .systemFill
         headerView.isUserInteractionEnabled = true
         headerView.clipsToBounds = true
         tableView.tableHeaderView = headerView
         
-        //profile picture
+        // Profile picture
         let profilePhoto = UIImageView(image: UIImage(systemName: "person.circle"))
         profilePhoto.tintColor = .white
         profilePhoto.contentMode = .scaleAspectFit
-        profilePhoto.frame = CGRect(x: (view.frame.width-(view.frame.width/4))/2,
-                                    y: (headerView.frame.height-(view.frame.width/4))/2.5,
-                                    width: view.frame.width/4,
-                                    height: view.frame.width/4)
+        profilePhoto.frame = CGRect(x: (view.frame.width - (view.frame.width / 4)) / 2,
+                                    y: (headerView.frame.height - (view.frame.width / 4)) / 2.5,
+                                    width: view.frame.width / 4,
+                                    height: view.frame.width / 4)
         profilePhoto.isUserInteractionEnabled = true
         profilePhoto.layer.masksToBounds = true
-        profilePhoto.layer.cornerRadius = profilePhoto.frame.width/2
+        profilePhoto.layer.cornerRadius = profilePhoto.frame.width / 2
         headerView.addSubview(profilePhoto)
         let tap = UITapGestureRecognizer(target: self, action: #selector(didTapProfilePhoto))
         profilePhoto.addGestureRecognizer(tap)
         
-        if let name = name{
+        if let name = name {
             title = name
         }
         
-        if let ref = profilePhotoUrl{
+        if let ref = profilePhotoUrl {
             StorageManager.shared.downlodaUrlForProfilePicture(path: ref) { url in
-                guard let url = url else{
+                guard let url = url else {
                     return
                 }
-                let task = URLSession.shared.dataTask(with: url) {data, _, _ in
-                    guard let data  = data else{
+                let task = URLSession.shared.dataTask(with: url) { data, _, _ in
+                    guard let data = data else {
                         return
                     }
-                    DispatchQueue.main.async{
+                    DispatchQueue.main.async {
                         profilePhoto.image = UIImage(data: data)
                     }
                 }
                 task.resume()
             }
         }
-        
     }
     
     private func setUpSettingsButton() {
@@ -109,12 +108,12 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         )
     }
     
-    @objc private func didTapProfilePhoto(){
-        guard let myEmail = UserDefaults.standard.string(forKey: "email") else{
+    @objc private func didTapProfilePhoto() {
+        guard let myEmail = UserDefaults.standard.string(forKey: "email") else {
             return
         }
         
-        guard myEmail == currentEmail else{
+        guard myEmail == currentEmail else {
             return
         }
         
@@ -131,13 +130,13 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         present(navController, animated: true, completion: nil)
     }
     
-    private func fetchProfileData(){
-        DatabaseManager.shared.getUser(email: currentEmail) {[weak self] user in
-            guard let user = user else{
+    private func fetchProfileData() {
+        DatabaseManager.shared.getUser(email: currentEmail) { [weak self] user in
+            guard let user = user else {
                 return
             }
             self?.user = user
-            DispatchQueue.main.async{
+            DispatchQueue.main.async {
                 self?.setUpTableHeader(
                     profilePhotoUrl: user.profilePictureUrlRef,
                     name: user.name)
@@ -145,8 +144,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
-    
-    //sign up func
+    // Sign out func
     @objc private func didTapSignOut() {
         let sheet = UIAlertController(title: "Sign Out", message: "Are you sure you'd like to sign out?", preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -180,12 +178,12 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         )
     }
     
-    //table view
-    private var posts : [BlogPost] = []
+    // Table view
+    private var posts: [BlogPost] = []
     
     private func fetchPosts() {
         print("Fetching posts...")
-
+        
         DatabaseManager.shared.getPosts(for: currentEmail) { [weak self] posts in
             // Sort posts by date of publication in descending order
             let sortedPosts = posts.sorted { $0.date > $1.date }
@@ -195,6 +193,11 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
                 self?.tableView.reloadData()
             }
         }
+    }
+    
+    @objc private func didCreateNewPost() {
+        // Refresh the posts when a new post is created
+        fetchPosts()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -213,7 +216,6 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 100
     }
-    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -234,13 +236,11 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
                 vc.navigationItem.largeTitleDisplayMode = .never
                 vc.title = "Post"
                 navigationController?.pushViewController(vc, animated: true)
-            }
-            else {
+            } else {
                 let vc = PayWallViewController()
                 present(vc, animated: true)
             }
-        }
-        else {
+        } else {
             // Our post
             let vc = ViewPostViewController(
                 post: posts[indexPath.row],
@@ -249,10 +249,8 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
             vc.navigationItem.largeTitleDisplayMode = .never
             vc.title = "Post"
             navigationController?.pushViewController(vc, animated: true)
-            
         }
     }
-    
 }
 
 extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -260,8 +258,7 @@ extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationCo
         picker.dismiss(animated: true, completion: nil)
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true, completion: nil)
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true, completion: nil)
         guard let image = info[.editedImage] as? UIImage else {
             return
@@ -269,13 +266,12 @@ extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationCo
         
         StorageManager.shared.uploadProfilePicture(
             email: currentEmail,
-            image: image) {
-                [weak self] success in
-                guard let strongSelf = self else {return}
+            image: image) { [weak self] success in
+                guard let strongSelf = self else { return }
                 if success {
-                    //update database
-                    DatabaseManager.shared.updateProfilePhoto(email: strongSelf.currentEmail){ updated in
-                        guard updated else{
+                    // Update database
+                    DatabaseManager.shared.updateProfilePhoto(email: strongSelf.currentEmail) { updated in
+                        guard updated else {
                             return
                         }
                         DispatchQueue.main.async {

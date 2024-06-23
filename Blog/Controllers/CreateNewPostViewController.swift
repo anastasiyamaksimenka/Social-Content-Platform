@@ -7,9 +7,9 @@
 
 import UIKit
 
-class CreateNewPostViewController: UITabBarController {
-    
-    //Title fild
+class CreateNewPostViewController: UIViewController {
+
+    // Title field
     private let titleField: UITextField = {
         let field = UITextField()
         field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
@@ -22,7 +22,7 @@ class CreateNewPostViewController: UITabBarController {
         return field
     }()
     
-    //Image header
+    // Image header
     private let headerImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -33,7 +33,7 @@ class CreateNewPostViewController: UITabBarController {
         return imageView
     }()
     
-    //textview for post
+    // Text view for post
     private let textView: UITextView = {
         let textView = UITextView()
         textView.backgroundColor = .secondarySystemBackground
@@ -50,13 +50,12 @@ class CreateNewPostViewController: UITabBarController {
         view.addSubview(headerImageView)
         view.addSubview(textView)
         view.addSubview(titleField)
-        let tap = UITapGestureRecognizer(target: self,
-                                         action: #selector(didTapHeader))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapHeader))
         headerImageView.addGestureRecognizer(tap)
-        cofigurateButtons()
+        configureButtons()
     }
     
-    @objc private func didTapHeader(){
+    @objc private func didTapHeader() {
         let picker = UIImagePickerController()
         picker.sourceType = .photoLibrary
         picker.delegate = self
@@ -65,25 +64,23 @@ class CreateNewPostViewController: UITabBarController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
         titleField.frame = CGRect(x: 10, y: view.safeAreaInsets.top, width: view.frame.width - 20, height: 50)
         headerImageView.frame = CGRect(x: 0, y: titleField.frame.maxY + 5, width: view.frame.width, height: 160)
         textView.frame = CGRect(x: 10, y: headerImageView.frame.maxY + 10, width: view.frame.width - 20, height: view.frame.height - 210 - view.safeAreaInsets.top)
     }
     
-    private func cofigurateButtons(){
+    private func configureButtons() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel",
-                                                           style: .done,//cancel
+                                                           style: .done,
                                                            target: self,
                                                            action: #selector(didTapCancel))
-        
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Post",
-                                                            style: .done,//cancel
+                                                            style: .done,
                                                             target: self,
                                                             action: #selector(didTapPost))
     }
     
-    @objc private func didTapCancel(){
+    @objc private func didTapCancel() {
         dismiss(animated: true, completion: nil)
     }
     
@@ -97,7 +94,7 @@ class CreateNewPostViewController: UITabBarController {
               !body.trimmingCharacters(in: .whitespaces).isEmpty else {
             
             let alert = UIAlertController(title: "Enter Post Details",
-                                          message: "Please enter a title, body, and select a image to continue.",
+                                          message: "Please enter a title, body, and select an image to continue.",
                                           preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
             present(alert, animated: true)
@@ -107,7 +104,7 @@ class CreateNewPostViewController: UITabBarController {
         
         let newPostId = UUID().uuidString
         
-        //upload header image
+        // Upload header image
         StorageManager.shared.uploadBlogHeaderImage(
             email: email,
             image: headerImage,
@@ -124,7 +121,7 @@ class CreateNewPostViewController: UITabBarController {
                     return
                 }
                 
-                //insert post int db
+                // Insert post into db
                 let post = BlogPost(identifier: newPostId,
                                     title: title,
                                     timestamp: Date().timeIntervalSince1970,
@@ -142,6 +139,7 @@ class CreateNewPostViewController: UITabBarController {
                     
                     DispatchQueue.main.async {
                         HapticsManager.shared.vibrate(for: .success)
+                        NotificationCenter.default.post(name: .didCreateNewPost, object: nil)
                         self?.didTapCancel()
                     }
                 }
@@ -149,7 +147,6 @@ class CreateNewPostViewController: UITabBarController {
         }
     }
 }
-
 
 extension CreateNewPostViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -164,4 +161,9 @@ extension CreateNewPostViewController: UIImagePickerControllerDelegate, UINaviga
         selectedHeaderImage = image
         headerImageView.image = image
     }
+}
+
+// Define a notification name for post creation
+extension Notification.Name {
+    static let didCreateNewPost = Notification.Name("didCreateNewPost")
 }

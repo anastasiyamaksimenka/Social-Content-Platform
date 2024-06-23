@@ -39,6 +39,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         tableView.delegate = self
         tableView.dataSource = self
         fetchAllPosts()
+        
+        // Observe the notification for new post creation
+        NotificationCenter.default.addObserver(self, selector: #selector(didCreateNewPost), name: .didCreateNewPost, object: nil)
     }
     
     override func viewDidLayoutSubviews() {
@@ -55,8 +58,6 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fetchAllPosts()
-        print("Posted new post...")
-        
     }
     
     @objc private func didTapCreate() {
@@ -64,6 +65,11 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         vc.title = "Create Post"
         let navVC = UINavigationController(rootViewController: vc)
         present(navVC, animated: true)
+    }
+    
+    @objc private func didCreateNewPost() {
+        // Refresh the posts when a new post is created
+        fetchAllPosts()
     }
     
     private var posts: [BlogPost] = []
@@ -84,7 +90,6 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             }
         }
     }
-
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count

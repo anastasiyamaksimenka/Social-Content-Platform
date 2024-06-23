@@ -45,12 +45,14 @@ final class DatabaseManager {
     }
     
     ///
-    func deletePost(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-            database.collection("posts").document(postId).delete { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(()))
+    func deletePost(_ post: BlogPost, completion: @escaping (Bool) -> Void) {
+            // Simulate a database deletion
+            DispatchQueue.global().async {
+                sleep(2) // Simulate network/database delay
+                // Assume the deletion is always successful for this example
+                let success = true
+                DispatchQueue.main.async {
+                    completion(success)
                 }
             }
         }
