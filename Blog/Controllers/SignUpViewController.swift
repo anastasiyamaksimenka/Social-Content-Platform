@@ -17,7 +17,7 @@ class SignUpViewController: UIViewController {
         let field = UITextField()
         field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
         field.leftViewMode = .always
-        field.placeholder = "Full Name"
+        field.placeholder = "Username"
         field.backgroundColor = .secondarySystemBackground
         field.layer.cornerRadius = 8
         field.layer.masksToBounds = true
@@ -64,6 +64,16 @@ class SignUpViewController: UIViewController {
         return field
     }()
     
+    // Password validation label
+    private let passwordValidationLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 12)
+        label.numberOfLines = 0
+        label.text = "" // Initial empty text
+        return label
+    }()
+    
     // Sign Up button
     private let signUpButton: UIButton = {
         let button = UIButton()
@@ -82,9 +92,13 @@ class SignUpViewController: UIViewController {
         view.addSubview(nameField)
         view.addSubview(emailField)
         view.addSubview(passwordField)
+        view.addSubview(passwordValidationLabel)
         view.addSubview(signUpButton)
         
         signUpButton.addTarget(self, action: #selector(didTapSignUp), for: .touchUpInside)
+        
+        // Add target for live validation
+        passwordField.addTarget(self, action: #selector(passwordFieldDidChange), for: .editingChanged)
     }
     
     override func viewDidLayoutSubviews() {
@@ -95,7 +109,8 @@ class SignUpViewController: UIViewController {
         nameField.frame = CGRect(x: 20, y: headerView.frame.origin.y + headerView.frame.size.height - 55 , width: view.frame.width - 40, height: 50)
         emailField.frame = CGRect(x: 20, y: nameField.frame.origin.y + nameField.frame.size.height + 10, width: view.frame.width - 40, height: 50)
         passwordField.frame = CGRect(x: 20, y: emailField.frame.origin.y + emailField.frame.size.height + 10, width: view.frame.width - 40, height: 50)
-        signUpButton.frame = CGRect(x: 20, y: passwordField.frame.origin.y + passwordField.frame.size.height + 30, width: view.frame.width - 40, height: 50)
+        passwordValidationLabel.frame = CGRect(x: 20, y: passwordField.frame.origin.y + passwordField.frame.size.height + 10, width: view.frame.width - 40, height: 50)
+        signUpButton.frame = CGRect(x: 20, y: passwordValidationLabel.frame.origin.y + passwordValidationLabel.frame.size.height + 30, width: view.frame.width - 40, height: 50)
     }
     
     @objc private func didTapSignUp() {
@@ -104,6 +119,12 @@ class SignUpViewController: UIViewController {
               let name = nameField.text, !name.isEmpty else {
             // Show alert if any field is empty
             showAlert(message: "Please fill out all fields.")
+            return
+        }
+        
+        // Validate password
+        guard validatePassword(password) else {
+            showAlert(message: "Password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, one digit, and one special character.")
             return
         }
         
@@ -132,6 +153,24 @@ class SignUpViewController: UIViewController {
                 print("Failed to create account")
             }
         }
+    }
+    
+    @objc private func passwordFieldDidChange(_ textField: UITextField) {
+        if let password = textField.text {
+            // Update password validation message
+            if validatePassword(password) {
+                passwordValidationLabel.text = "Password is valid."
+                passwordValidationLabel.textColor = .green
+            } else {
+                passwordValidationLabel.text = "Password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, one digit, and one special character."
+                passwordValidationLabel.textColor = .red
+            }
+        }
+    }
+    
+    private func validatePassword(_ password: String) -> Bool {
+        let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$")
+        return passwordPredicate.evaluate(with: password)
     }
     
     @objc private func togglePasswordVisibility(_ sender: UIButton) {
