@@ -39,7 +39,14 @@ class TabBarViewController: UITabBarController {
         nav2.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 2)
         
         
-        setViewControllers([nav1, nav2], animated: true)
+        let search = SearchViewController()
+        search.title = "Search"
+        let nav3 = UINavigationController(rootViewController: search)
+        nav3.navigationBar.prefersLargeTitles = true
+        nav3.tabBarItem = UITabBarItem(title: "Search", image: UIImage(systemName: "magnifyingglass"), tag: 3)
+                
+        setViewControllers([nav1, nav2, nav3], animated: true)
+        
     }
     
     

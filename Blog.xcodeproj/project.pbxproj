@@ -35,6 +35,7 @@
 		BF619C242B54519E0099CC94 /* BlogPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF619C232B54519E0099CC94 /* BlogPost.swift */; };
 		BF74746B2BD912FA001A79DB /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74746A2BD912FA001A79DB /* SettingsViewController.swift */; };
 		BFA69F102BD55C3C00A8D8B7 /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFA69F0F2BD55C3B00A8D8B7 /* ForgotPasswordViewController.swift */; };
+		BFC523162C60008A0048864D /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFC523152C60008A0048864D /* SearchViewController.swift */; };
 		BFEBC6512B77B82D00AA3C1E /* PostPreviewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFEBC6502B77B82D00AA3C1E /* PostPreviewTableViewCell.swift */; };
 		BFEBC6532B77B84E00AA3C1E /* PostHeaderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFEBC6522B77B84E00AA3C1E /* PostHeaderTableViewCell.swift */; };
 /* End PBXBuildFile section */
@@ -90,6 +91,7 @@
 		BF619C232B54519E0099CC94 /* BlogPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlogPost.swift; sourceTree = "<group>"; };
 		BF74746A2BD912FA001A79DB /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BFA69F0F2BD55C3B00A8D8B7 /* ForgotPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordViewController.swift; sourceTree = "<group>"; };
+		BFC523152C60008A0048864D /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		BFEBC6502B77B82D00AA3C1E /* PostPreviewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostPreviewTableViewCell.swift; sourceTree = "<group>"; };
 		BFEBC6522B77B84E00AA3C1E /* PostHeaderTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostHeaderTableViewCell.swift; sourceTree = "<group>"; };
 		D0273EAE0FD45005C1608342 /* Pods-Blog.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Blog.release.xcconfig"; path = "Target Support Files/Pods-Blog/Pods-Blog.release.xcconfig"; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				BF0D2A442B3CBE3200DBEBA3 /* CreateNewPostViewController.swift */,
 				BFA69F0F2BD55C3B00A8D8B7 /* ForgotPasswordViewController.swift */,
 				BF74746A2BD912FA001A79DB /* SettingsViewController.swift */,
+				BFC523152C60008A0048864D /* SearchViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -459,6 +462,7 @@
 				BFEBC6532B77B84E00AA3C1E /* PostHeaderTableViewCell.swift in Sources */,
 				BF0066D42B519EA70051F0A2 /* User.swift in Sources */,
 				BF0D2A3B2B3CBD6700DBEBA3 /* ProfileViewController.swift in Sources */,
+				BFC523162C60008A0048864D /* SearchViewController.swift in Sources */,
 				BF74746B2BD912FA001A79DB /* SettingsViewController.swift in Sources */,
 				BFEBC6512B77B82D00AA3C1E /* PostPreviewTableViewCell.swift in Sources */,
 				BF0D2A452B3CBE3200DBEBA3 /* CreateNewPostViewController.swift in Sources */,
